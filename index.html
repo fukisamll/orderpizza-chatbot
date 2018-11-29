@@ -1,37 +1,336 @@
-## Welcome to GitHub Pages
+<html>
+<head>
+	<title>Order Pizza Chatbot</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 
-You can use the [editor on GitHub](https://github.com/fukisamll/orderpizza-chatbot/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+<script type="text/javascript">
+    $(document).ready(function(){
+      var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      if (!isChrome) {
+        $("#browserNote").text("請使用Chrome瀏覽器才能進行語音辨識");
+      }
+    });
+  </script>
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+    <script type="text/javascript">
+    var accessToken = "f0b39420210c46c9ac49233af3b5ff91",
+      baseUrl = "https://api.dialogflow.com/v1/",
+      $speechInput,
+      $recBtn,
+      recognition,
+      messageRecording = "請靠近麥克風說話...",
+      messageCouldntHear = "抱歉我聽不清楚，可以再說一次嗎?",
+      messageInternalError = "喔不！網路伺服器出錯了！",
+      messageSorry = "利供蝦?";
 
-### Markdown
+    $(document).ready(function() {
+      $speechInput = $("#speech");
+      $recBtn = $("#rec");
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+      $speechInput.keypress(function(event) {
+        if (event.which == 13) {
+          event.preventDefault();
+          send();
+		  this.value = '';
+        }
+      });
+      $recBtn.on("click", function(event) {
+        switchRecognition();
+      });
+      $(".debug__btn").on("click", function() {
+        $(this).next().toggleClass("is-active");
+        return false;
+      });
+    });
 
-```markdown
-Syntax highlighted code block
+    function startRecognition() {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+          recognition.interimResults = false;
 
-# Header 1
-## Header 2
-### Header 3
+      recognition.onstart = function(event) {
+        respond(messageRecording);
+        updateRec();
+      };
+      recognition.onresult = function(event) {
+        recognition.onend = null;
+        
+        var text = "";
+          for (var i = event.resultIndex; i < event.results.length; ++i) {
+            text += event.results[i][0].transcript;
+          }
+          setInput(text);
+        stopRecognition();
+      };
+      recognition.onend = function() {
+        respond(messageCouldntHear);
+        stopRecognition();
+      };
+      recognition.lang = "zh-TW";
+      recognition.start();
+    }
+  
+    function stopRecognition() {
+      if (recognition) {
+        recognition.stop();
+        recognition = null;
+      }
+      updateRec();
+    }
 
-- Bulleted
-- List
+    function switchRecognition() {
+      if (recognition) {
+        stopRecognition();
+      } else {
+        startRecognition();
+      }
+    }
 
-1. Numbered
-2. List
+    function setInput(text) {
+      $speechInput.val(text);
+      send();
+    }
 
-**Bold** and _Italic_ and `Code` text
+    //function updateRec() {
+      //$recBtn.text(recognition ? "Stop" : "Speak");
+    //}
 
-[Link](url) and ![Image](src)
-```
+    function send() {
+      var text = $speechInput.val();
+      $.ajax({
+        type: "POST",
+        url: baseUrl + "query",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        headers: {
+          "Authorization": "Bearer " + accessToken
+        },
+        data: JSON.stringify({query: text, lang: "zh", sessionId: "yaydevdiner"}),
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+        success: function(data) {
+          prepareResponse(data);
+        },
+        error: function() {
+          respond(messageInternalError);
+        }
+      });
+    }
 
-### Jekyll Themes
+    function prepareResponse(val) {
+      var debugJSON = JSON.stringify(val, undefined, 2),
+        spokenResponse = val.result.speech;
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/fukisamll/orderpizza-chatbot/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+      respond(spokenResponse);
+      debugRespond(debugJSON);
+    }
 
-### Support or Contact
+    function debugRespond(val) {
+      $("#response").text(val);
+    }
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+	function saveOrder(agent) {
+      const orderParam = agent.parameters.order;
+      const amountParam = agent.parameters.amount;
+      const telParam = agent.parameters.tel;
+      const context = agent.getContext('awaiting_order_confirm');
+      const order = orderParam || context.parameters.order;
+      const amount = amountParam || context.parameters.amount;
+      const tel = telParam || context.parameters.tel;
+      agent.add(`已完成訂購！謝謝您的惠顧，披薩現點現做請稍候15分鐘，取餐時請告知剛才所留下的電話號碼。`);
+	  var Nowymdhms　=　new Date();
+    var NowYear = Nowymdhms.getFullYear();
+    var NowMon = Nowymdhms.getMonth() + 1;
+    var NowDay = Nowymdhms.getDate();
+    var NowHour = Nowymdhms.getHours() + 8;
+    var NowMin = Nowymdhms.getMinutes();
+    
+    if(NowHour < 10){
+	NowHour = "0" + NowHour;
+    }
+    
+    if(NowMin < 10){
+	NowMin = "0" + NowMin;
+    }   
+    
+    
+    var Nowymdhms = NowYear + "-" + NowMon + "-" + NowDay + " " + NowHour + ":" + NowMin;
+    
+     
+      return admin.database().ref('/order data').push({披薩口味:order, 數量:amount , 電話:tel , 日期:Nowymdhms}).then((snapshot) => {
+        console.log('database write sucessful:' + snapshot.ref.toString());
+    });
+    }
+	
+    function respond(val) {
+      if (val == "") {
+        val = messageSorry;
+      }
+
+      if (val !== messageRecording) {
+        var msg = new SpeechSynthesisUtterance();
+        msg.voiceURI = "native";
+        msg.text = val;
+        msg.lang = "zh-TW";
+        window.speechSynthesis.speak(msg);
+      }
+
+      $("#spokenResponse").addClass("is-active").find(".spoken-response__text").html(val);
+    }
+  </script>
+
+  
+     <style type="text/css">
+    html {
+      box-sizing: border-box;
+    }
+    *, *:before, *:after {
+      box-sizing: inherit;
+    }
+    body {
+      
+	  background-image:url('https://st.depositphotos.com/3470617/4920/v/950/depositphotos_49203389-stock-illustration-pizza-background.jpg');
+      font-family: "Titillium Web", Arial, sans-serif;
+      font-size: 20px;
+      margin: 0;
+    }
+    #browserNote {
+      color: white;
+    }
+    .container {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      -webkit-transform: translate(-50%, -50%);
+    }
+	.header {
+  margin: 0 auto;
+}
+
+.bot-img {
+  width: 200px;
+  height: auto;
+  color: #000000;
+}
+
+.header {
+  color: #16387c;
+  background-color:#ffffff;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  
+}
+    input {
+      background-color: #000000;
+      border: 1px solid #ffffff;
+      color: #ffffff;
+      font-family: "Titillium Web";
+      font-size: 20px;
+      line-height: 43px;
+      padding: 0 0.75em;
+      width: 400px;
+      -webkit-transition: all 0.35s ease-in;
+    }
+    textarea {
+      background-color: #070F24;
+      border: 1px solid #122435;
+      color: #606B88;
+      padding: 0.5em;
+      width: 100%;
+      -webkit-transition: all 0.35s ease-in;
+    }
+    input:active, input:focus, textarea:active, textarea:focus {
+      outline: 1px solid #48788B;
+    }
+    .btn {
+      background-color: #ffffff;
+      
+      color: #727781;
+      cursor: pointer;
+	  vertical-align:middle;
+      display: inline-block;
+      font-family: "Titillium Web";
+      font-size: 20px;
+      line-height: 43px;
+      padding: 0 0.75em;
+      text-align: center;
+      text-transform: uppercase;
+      -webkit-transition: all 0.35s ease-in;
+    }
+    .btn:hover {
+      background-color: #d2d6dd;
+      color: #000000;
+    }
+    .debug {
+      bottom: 0;
+      position: fixed;
+      right: 0;
+    }
+    .debug__content {
+      font-size: 14px;
+      max-height: 0;
+      overflow: hidden;
+      -webkit-transition: all 0.35s ease-in;
+    }
+    .debug__content.is-active {
+      display: block;
+      max-height: 500px;
+    }
+    .debug__btn {
+      width: 100%;
+    }
+    .spoken-response {
+      max-height: 0;
+      overflow: hidden;
+      -webkit-transition: all 0.35s ease-in;
+    }
+    .spoken-response.is-active {
+      max-height: 400px;
+    }
+    .spoken-response__text {
+      background-color: #ffffff;
+      color: #000000;
+      padding: 1em;
+	  border: 10px solid #549EAF;
+    }
+  </style>
+</head>
+
+<body>
+  
+  <div class="container">
+  <div class="header">
+    <img class="bot-img" src = "https://loading.io/assets/img/animation/icon/showcase/robot.svg" >
+    <h1>披薩點餐聊天機器人</h1>  
+  </div>
+    <p id='browserNote'></p>
+    <input id="speech" type="text">
+    <button id="rec" class="btn">
+		<i class="fa fa-microphone" style="font-size:43px"></i>
+	</button>
+    <div id="spokenResponse" class="spoken-response">
+      <div class="spoken-response__text"></div>
+    </div>
+  </div>
+  
+  <div class="debug">
+    <div class="debug__btn btn">
+      Debug JSON results
+    </div>
+	
+    <div class="debug__content">
+      <textarea id="response" cols="40" rows="20"></textarea>
+    </div>
+  </div>
+
+    <link href="https://fonts.googleapis.com/css?family=Titillium+Web" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="css/style.css">
+</body>
+</html>
+  
+ 
+</body>
+
+</html>
