@@ -22,7 +22,7 @@
       recognition,
       messageRecording = "請靠近麥克風說話...",
       messageCouldntHear = "抱歉我聽不清楚，可以再說一次嗎?",
-      messageInternalError = "喔不！網路伺服器出錯了！",
+      messageInternalError = "請輸入文字或按下麥克風按鈕說話，謝謝！",
       messageSorry = "利供蝦?";
 
     $(document).ready(function() {
@@ -129,39 +129,6 @@
     function debugRespond(val) {
       $("#response").text(val);
     }
-
-	function saveOrder(agent) {
-      const orderParam = agent.parameters.order;
-      const amountParam = agent.parameters.amount;
-      const telParam = agent.parameters.tel;
-      const context = agent.getContext('awaiting_order_confirm');
-      const order = orderParam || context.parameters.order;
-      const amount = amountParam || context.parameters.amount;
-      const tel = telParam || context.parameters.tel;
-      agent.add(`已完成訂購！謝謝您的惠顧，披薩現點現做請稍候15分鐘，取餐時請告知剛才所留下的電話號碼。`);
-	  var Nowymdhms　=　new Date();
-    var NowYear = Nowymdhms.getFullYear();
-    var NowMon = Nowymdhms.getMonth() + 1;
-    var NowDay = Nowymdhms.getDate();
-    var NowHour = Nowymdhms.getHours() + 8;
-    var NowMin = Nowymdhms.getMinutes();
-    
-    if(NowHour < 10){
-	NowHour = "0" + NowHour;
-    }
-    
-    if(NowMin < 10){
-	NowMin = "0" + NowMin;
-    }   
-    
-    
-    var Nowymdhms = NowYear + "-" + NowMon + "-" + NowDay + " " + NowHour + ":" + NowMin;
-    
-     
-      return admin.database().ref('/order data').push({披薩口味:order, 數量:amount , 電話:tel , 日期:Nowymdhms}).then((snapshot) => {
-        console.log('database write sucessful:' + snapshot.ref.toString());
-    });
-    }
 	
     function respond(val) {
       if (val == "") {
@@ -173,6 +140,7 @@
         msg.voiceURI = "native";
         msg.text = val;
         msg.lang = "zh-TW";
+	window.speechSynthesis.cancel();
         window.speechSynthesis.speak(msg);
       }
 
