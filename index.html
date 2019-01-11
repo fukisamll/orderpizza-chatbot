@@ -24,7 +24,8 @@
       messageCouldntHear = "抱歉我聽不清楚，可以再說一次嗎?",
       messageInternalError = "請輸入文字或按下麥克風按鈕說話，謝謝！",
       messageSorry = "利供蝦?";
-
+	    
+//錄音按鈕和文字輸入
     $(document).ready(function() {
       $speechInput = $("#speech");
       $recBtn = $("#rec");
@@ -45,6 +46,7 @@
       });
     });
 
+//開始語音辨識
     function startRecognition() {
       recognition = new webkitSpeechRecognition();
       recognition.continuous = false;
@@ -68,10 +70,11 @@
         respond(messageCouldntHear);
         stopRecognition();
       };
-      recognition.lang = "zh-TW";
+      recognition.lang = "zh-TW";//語音辨識語言設定為台灣中文
       recognition.start();
     }
   
+//停止語音辨識
     function stopRecognition() {
       if (recognition) {
         recognition.stop();
@@ -80,6 +83,7 @@
       updateRec();
     }
 
+//轉換語音辨識狀態
     function switchRecognition() {
       if (recognition) {
         stopRecognition();
@@ -88,15 +92,17 @@
       }
     }
 
+//將文字送出
     function setInput(text) {
       $speechInput.val(text);
       send();
     }
 
-    function updateRec() {
-      $recBtn.text(recognition ? "Stop" : "Speak");
-    }
+    //function updateRec() {
+      //$recBtn.text(recognition ? "Stop" : "Speak");
+    //}
 
+//送到dialogflow處理
     function send() {
       var text = $speechInput.val();
       $.ajax({
@@ -118,16 +124,17 @@
       });
     }
 	
-	//暫停
+	//暫停語音
 	function pause() {
 		window.speechSynthesis.pause();
 		}
 		
-	//繼續
+	//繼續語音
 	function resume() {
 		window.speechSynthesis.resume(); 
 		}    
-
+	    
+//回傳dialogflow debug訊息
     function prepareResponse(val) {
       var debugJSON = JSON.stringify(val, undefined, 2),
         spokenResponse = val.result.speech;
@@ -139,7 +146,8 @@
     function debugRespond(val) {
       $("#response").text(val);
     }
-	
+
+//回傳訊息
     function respond(val) {
       if (val == "") {
         val = messageSorry;
