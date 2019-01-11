@@ -117,6 +117,16 @@
         }
       });
     }
+	
+	//暫停
+	function pause() {
+		window.speechSynthesis.pause();
+		}
+		
+	//繼續
+	function resume() {
+		window.speechSynthesis.resume(); 
+		}    
 
     function prepareResponse(val) {
       var debugJSON = JSON.stringify(val, undefined, 2),
@@ -277,7 +287,9 @@
     <input id="speech" type="text">
     <button id="rec" class="btn">
 		<i class="fa fa-microphone" style="font-size:43px"></i>
-	</button>
+	</button>	
+<button onclick="resume()">繼續</button>
+<button onclick="pause()">噓！</button>	  
     <div id="spokenResponse" class="spoken-response">
       <div class="spoken-response__text"></div>
     </div>
