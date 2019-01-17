@@ -106,13 +106,13 @@
       var text = $speechInput.val();
       $.ajax({
         type: "POST",
-        url: baseUrl + "query?v=20150910",
+        url: baseUrl + "query",
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         headers: {
           "Authorization": "Bearer " + accessToken
         },
-        data: JSON.stringify({query: text, lang: "zh", sessionId: "somerandomthing"}),
+        data: JSON.stringify({query: text, lang: "zh", sessionId: "yaydevdiner"}),
 
         success: function(data) {
           prepareResponse(data);
@@ -164,9 +164,8 @@
       $("#spokenResponse").addClass("is-active").find(".spoken-response__text").html(val);
     }
   </script>
-	
-	
-	
+
+  
      <style type="text/css">
     html {
       box-sizing: border-box;
@@ -319,7 +318,7 @@
 </body>
 </html>
   
-
+ 
 </body>
 
 </html>
