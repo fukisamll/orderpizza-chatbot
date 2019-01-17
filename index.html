@@ -165,6 +165,65 @@
     }
   </script>
 
+ <script type="text/javascript">
+	 const functions = require('firebase-functions'); // Cloud Functions for Firebase library
+const {WebhookClient} = require('dialogflow-fulfillment');
+
+const admin = require('firebase-admin');
+admin.initializeApp();
+
+process.env.DEBUG = 'dialogflow:debug';
+
+//const DialogflowApp = require('actions-on-google').DialogflowApp; // Google Assistant helper library
+exports.dialogflowFirebaseFulfillment = functions.https.onRequest((request, response) => {
+  const agent = new WebhookClient({ request, response });
+  console.log('Dialogflow Request headers: ' + JSON.stringify(request.headers));
+  console.log('Dialogflow Request body: ' + JSON.stringify(request.body));
+ 
+ 
+  function saveOrder(agent) {
+      const orderParam = agent.parameters.order;
+      const amountParam = agent.parameters.amount;
+      const telParam = agent.parameters.tel;
+      const context = agent.getContext('awaiting_order_confirm');
+      const order = orderParam || context.parameters.order;
+      const amount = amountParam || context.parameters.amount;
+      const tel = telParam || context.parameters.tel;
+      agent.add(`已完成訂購！謝謝您的惠顧，披薩現點現做請稍候15分鐘，取餐時請告知剛才所留下的電話號碼。`);
+      
+    
+    var Nowymdhms　=　new Date();
+    var NowYear = Nowymdhms.getFullYear();
+    var NowMon = Nowymdhms.getMonth() + 1;
+    var NowDay = Nowymdhms.getDate();
+    var NowHour = Nowymdhms.getHours() + 8;
+    var NowMin = Nowymdhms.getMinutes();
+    
+    if(NowHour < 10){
+	NowHour = "0" + NowHour;
+    }
+    
+    if(NowMin < 10){
+	NowMin = "0" + NowMin;
+    }   
+    
+    
+    var Nowymdhms = NowYear + "-" + NowMon + "-" + NowDay + " " + NowHour + ":" + NowMin;
+    
+     
+      return admin.database().ref('/order data').push({披薩口味:order, 數量:amount , 電話:tel , 日期:Nowymdhms}).then((snapshot) => {
+        console.log('database write sucessful:' + snapshot.ref.toString());
+    });
+    }
+  
+  let intentMap = new Map();
+  intentMap.set('Get Order', saveOrder);
+  intentMap.set('Confirm Order Yes', saveOrder);
+  agent.handleRequest(intentMap);
+});
+
+</script>
+	
   
      <style type="text/css">
     html {
@@ -318,6 +377,19 @@
 </body>
 </html>
   
+<script src="https://www.gstatic.com/firebasejs/5.7.3/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyA1CbrjvfuQov-WzCSaD4jBS5Kz-LORdm8",
+    authDomain: "food-95193.firebaseapp.com",
+    databaseURL: "https://food-95193.firebaseio.com",
+    projectId: "food-95193",
+    storageBucket: "food-95193.appspot.com",
+    messagingSenderId: "987923786819"
+  };
+  firebase.initializeApp(config);
+</script>
  
 </body>
 
