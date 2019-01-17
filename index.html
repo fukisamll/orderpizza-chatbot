@@ -116,8 +116,9 @@
 
         success: function(data) {
 	var respText = data.result.fulfillment.speech;
-	setResponse(respText);
-          prepareResponse(data);
+                console.log("Respuesta: " + respText);
+                setResponse(respText);
+          //prepareResponse(data);
         },
         error: function() {
           respond(messageInternalError);
