@@ -115,10 +115,7 @@
         data: JSON.stringify({query: text, lang: "zh", sessionId: "somerandomthing"}),
 
         success: function(data) {
-	var respText = data.result.fulfillment.speech;
-                console.log("Respuesta: " + respText);
-                setResponse(respText);
-          //prepareResponse(data);
+          prepareResponse(data);
         },
         error: function() {
           respond(messageInternalError);
